@@ -1,0 +1,24 @@
+{
+  "name": "falcon-giving-broker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Node broker between the Falcon Giving widget and Paynow BillPay. A reference implementation for Paynow for Schools.",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "pino": "^9.5.0",
+    "pino-http": "^10.3.0",
+    "pino-pretty": "^11.3.0",
+    "zod": "^3.23.8"
+  }
+}
