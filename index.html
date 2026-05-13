@@ -1,0 +1,2575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Falcon College — The Old Hawks Fund · powered by Paynow for Schools</title>
+<meta name="description" content="A programmable giving widget for Falcon College alumni, built on Paynow billpay infrastructure. A demonstration of Paynow for Schools." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --ink: #0A1628;
+    --ink-2: #1A2A40;
+    --paper: #ECE4D0;
+    --paper-deep: #DDD2B8;
+    --cream: #F7F0DE;
+    --navy: #0B2447;
+    --navy-deep: #061629;
+    --navy-soft: #1E3D72;
+    --gold: #C9A961;
+    --gold-soft: #E5C885;
+    --gold-deep: #8E7330;
+    --line: rgba(10, 22, 40, 0.14);
+    --line-strong: rgba(10, 22, 40, 0.32);
+    --shadow-paper: 0 1px 0 rgba(10,22,40,0.04), 0 20px 40px -24px rgba(11, 36, 71, 0.22);
+
+    --font-display: 'Fraunces', 'Times New Roman', serif;
+    --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.5;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(26,15,10,0.05) 1px, transparent 0);
+    background-size: 3px 3px;
+    opacity: 0.6;
+    mix-blend-mode: multiply;
+  }
+
+  ::selection { background: var(--navy); color: var(--cream); }
+
+  /* ---------- shared primitives ---------- */
+  .container { max-width: 1320px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 2; }
+  @media (max-width: 640px) { .container { padding: 0 20px; } }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+
+  .rule { display: flex; align-items: center; gap: 12px; }
+  .rule::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .rule::before { content: ''; width: 24px; height: 1px; background: var(--navy); }
+  .rule.center { justify-content: center; }
+  .rule.center::before, .rule.center::after { flex: 0; width: 60px; }
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+    letter-spacing: -0.025em;
+    line-height: 0.95;
+    color: var(--ink);
+  }
+  .display em {
+    font-style: italic;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80;
+    color: var(--navy-soft);
+  }
+
+  .body-serif {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 14, 'SOFT' 50;
+  }
+
+  .num { font-family: var(--font-mono); font-feature-settings: 'tnum' 1, 'lnum' 1; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(242, 231, 208, 0.92);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 32px;
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+  .brand-mark {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; color: inherit;
+  }
+  .brand-crest { width: 32px; height: 38px; flex-shrink: 0; }
+  .brand-words {
+    display: flex; flex-direction: column; line-height: 1;
+  }
+  .brand-words .one {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    font-variation-settings: 'opsz' 60, 'SOFT' 20;
+    letter-spacing: -0.01em;
+  }
+  .brand-words .two {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-top: 4px;
+  }
+  .nav {
+    display: flex; gap: 28px; align-items: center;
+  }
+  .nav a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink-2);
+    transition: color 160ms ease;
+  }
+  .nav a:hover { color: var(--navy); }
+  .nav a.cta {
+    background: var(--navy);
+    color: var(--cream);
+    padding: 10px 16px;
+    border-radius: 2px;
+  }
+  .nav a.cta:hover { background: var(--navy-deep); color: var(--cream); }
+  @media (max-width: 760px) {
+    .nav { gap: 16px; }
+    .nav a:not(.cta) { display: none; }
+    .topbar-inner { padding: 12px 20px; }
+    .brand-words .two { display: none; }
+    .brand-crest { width: 28px; height: 32px; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding: 80px 0 100px;
+    position: relative;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 56px; }
+    .hero { padding: 56px 0 80px; }
+  }
+  .hero-meta {
+    display: flex; gap: 24px; margin-bottom: 28px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .hero-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--navy); }
+  .hero-meta .label {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);
+  }
+  h1.hero-title {
+    font-size: clamp(56px, 10vw, 152px);
+    margin-bottom: 36px;
+  }
+  .hero-lede {
+    max-width: 540px;
+    font-family: var(--font-display);
+    font-size: 22px;
+    line-height: 1.4;
+    font-variation-settings: 'opsz' 30, 'SOFT' 70;
+    color: var(--ink-2);
+    margin-bottom: 40px;
+  }
+  .hero-lede strong { color: var(--ink); font-weight: 500; }
+  .hero-cta-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 16px 28px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    display: inline-flex; align-items: center; gap: 10px;
+    font-weight: 500;
+  }
+  .btn-primary {
+    background: var(--navy);
+    color: var(--cream);
+  }
+  .btn-primary:hover { background: var(--navy-deep); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+  }
+  .btn-ghost:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .btn .arrow { transition: transform 180ms ease; }
+  .btn:hover .arrow { transform: translateX(4px); }
+
+  /* hero spotlight card */
+  .spotlight {
+    border: 1px solid var(--line-strong);
+    background: var(--cream);
+    padding: 28px;
+    position: relative;
+    box-shadow: var(--shadow-paper);
+  }
+  .spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid var(--line);
+    pointer-events: none;
+  }
+  .spotlight-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .spotlight-head .tag {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--navy); background: rgba(94,26,26,0.06);
+    padding: 4px 8px;
+  }
+  .spotlight-head .num-no { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+  .spotlight h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 60, 'SOFT' 60;
+    font-size: 32px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .spotlight p {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 14, 'SOFT' 50;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    margin-bottom: 24px;
+  }
+  .progress-block {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .progress-block .raised {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-variation-settings: 'opsz' 60, 'SOFT' 40;
+    letter-spacing: -0.02em;
+    color: var(--navy);
+  }
+  .progress-block .goal {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--paper-deep);
+    position: relative;
+    overflow: hidden;
+  }
+  .progress-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--navy), var(--gold));
+    width: 0%;
+    transition: width 1.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .spotlight-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .spotlight-stats > div { padding-right: 12px; }
+  .spotlight-stats > div + div { border-left: 1px solid var(--line); padding-left: 12px; }
+  .spotlight-stats .stat-n {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-variation-settings: 'opsz' 30, 'SOFT' 50;
+    letter-spacing: -0.02em;
+  }
+  .spotlight-stats .stat-l {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  /* hero footer marquee — campaign categories */
+  .hero-marquee {
+    margin-top: 80px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 20px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .marquee-inner {
+    display: inline-flex;
+    gap: 64px;
+    align-items: center;
+    animation: marquee 50s linear infinite;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .marquee-item {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-variation-settings: 'opsz' 60, 'SOFT' 80;
+    font-style: italic;
+    color: var(--ink-2);
+    display: inline-flex; align-items: center; gap: 64px;
+  }
+  .marquee-item::after {
+    content: '✦';
+    color: var(--gold);
+    font-style: normal;
+    font-size: 14px;
+  }
+
+  /* ---------- widget section ---------- */
+  .widget-section {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 120px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .widget-section::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(184, 146, 74, 0.04) 1px, transparent 0);
+    background-size: 4px 4px;
+    pointer-events: none;
+  }
+  .widget-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: end;
+    margin-bottom: 64px;
+  }
+  @media (max-width: 980px) {
+    .widget-header { grid-template-columns: 1fr; gap: 32px; }
+    .widget-section { padding: 80px 0; }
+  }
+  .widget-section .eyebrow { color: var(--gold-soft); }
+  .widget-section .display { color: var(--cream); }
+  .widget-section .display em { color: var(--gold-soft); }
+  .widget-header h2 {
+    font-size: clamp(40px, 6vw, 80px);
+    margin-top: 16px;
+  }
+  .widget-header p {
+    font-family: var(--font-display);
+    font-size: 18px;
+    line-height: 1.5;
+    color: rgba(250, 244, 230, 0.75);
+    font-variation-settings: 'opsz' 18, 'SOFT' 50;
+    max-width: 460px;
+  }
+
+  /* the widget itself */
+  .widget {
+    background: var(--cream);
+    color: var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    box-shadow: 0 40px 100px -40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(184, 146, 74, 0.1);
+    position: relative;
+  }
+  @media (max-width: 880px) {
+    .widget { grid-template-columns: 1fr; }
+  }
+
+  /* widget left — campaign chooser */
+  .widget-left {
+    padding: 40px;
+    background: linear-gradient(180deg, var(--cream) 0%, var(--paper) 100%);
+    border-right: 1px solid var(--line);
+  }
+  @media (max-width: 880px) {
+    .widget-left { border-right: none; border-bottom: 1px solid var(--line); padding: 28px; }
+  }
+  .widget-left .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .campaign-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .campaign-item {
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.4);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 160ms ease;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .campaign-item:hover { border-color: var(--navy); background: rgba(255,255,255,0.7); }
+  .campaign-item.active {
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+  }
+  .campaign-item.active .ci-progress { background: rgba(212,179,116,0.2); }
+  .campaign-item.active .ci-progress .ci-fill { background: var(--gold-soft); }
+  .campaign-item.active .ci-meta { color: var(--gold-soft); }
+  .ci-icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    border: 1px solid currentColor;
+    display: grid; place-items: center;
+    opacity: 0.7;
+  }
+  .ci-icon svg { width: 18px; height: 18px; }
+  .ci-body { flex: 1; min-width: 0; }
+  .ci-name {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 30, 'SOFT' 40;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .ci-progress {
+    height: 3px;
+    background: var(--paper-deep);
+    position: relative;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .ci-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--navy);
+    transition: width 800ms ease;
+  }
+  .ci-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--ink-2);
+    display: flex; justify-content: space-between;
+  }
+
+  .featured-campaign {
+    padding: 20px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    position: relative;
+  }
+  .featured-campaign::before {
+    content: '';
+    position: absolute; left: 6px; top: 6px; right: 6px; bottom: 6px;
+    border: 1px solid var(--line);
+    pointer-events: none;
+  }
+  .featured-campaign .head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .featured-campaign .head .tag {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--navy);
+  }
+  .featured-campaign .head .num-no {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--ink-2);
+  }
+  .featured-campaign h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 60, 'SOFT' 60;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 10px;
+  }
+  .featured-campaign p {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 14, 'SOFT' 50;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin-bottom: 18px;
+  }
+  .featured-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .featured-meta > div { font-family: var(--font-mono); font-size: 10px; color: var(--ink-2); letter-spacing: 0.05em; }
+  .featured-meta .v { font-family: var(--font-display); font-size: 18px; font-variation-settings: 'opsz' 30; letter-spacing: -0.02em; color: var(--ink); display: block; margin-bottom: 2px; }
+
+  /* widget right — donation form */
+  .widget-right {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    min-height: 580px;
+  }
+  @media (max-width: 880px) {
+    .widget-right { padding: 28px; min-height: auto; }
+  }
+  .step-indicator {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .step-indicator .step {
+    display: flex; align-items: center; gap: 6px;
+    opacity: 0.4;
+    transition: opacity 200ms ease;
+  }
+  .step-indicator .step.active { opacity: 1; color: var(--navy); }
+  .step-indicator .step.done { opacity: 1; color: var(--gold-deep); }
+  .step-indicator .dot {
+    width: 5px; height: 5px;
+    background: currentColor;
+    border-radius: 50%;
+  }
+  .step-indicator .sep { color: var(--line-strong); }
+
+  .step-panel { display: none; flex-direction: column; flex: 1; animation: stepIn 320ms ease; }
+  .step-panel.active { display: flex; }
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .amount-section { margin-bottom: 24px; }
+  .amount-section label, .field-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    display: block;
+    margin-bottom: 12px;
+  }
+  .amount-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .amount-chip {
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    padding: 16px 8px;
+    font: inherit;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-variation-settings: 'opsz' 30, 'SOFT' 40;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    transition: all 140ms ease;
+    color: var(--ink);
+  }
+  .amount-chip:hover { border-color: var(--navy); }
+  .amount-chip.active {
+    background: var(--navy);
+    color: var(--cream);
+    border-color: var(--navy);
+  }
+  .custom-amount {
+    width: 100%;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    padding: 14px 16px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-variation-settings: 'opsz' 30, 'SOFT' 40;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 140ms ease;
+  }
+  .custom-amount:focus { border-color: var(--navy); }
+  .custom-amount::placeholder { color: var(--ink-2); opacity: 0.5; }
+
+  .field { margin-bottom: 16px; }
+  .field input, .field textarea {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--line-strong);
+    background: transparent;
+    padding: 10px 0;
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 18, 'SOFT' 40;
+    font-size: 17px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 140ms ease;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--navy); }
+  .field input::placeholder, .field textarea::placeholder { color: var(--ink-2); opacity: 0.5; }
+  .field textarea { resize: none; min-height: 60px; }
+
+  .checkbox-row {
+    display: flex; align-items: center; gap: 10px;
+    margin: 18px 0 24px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-2);
+    cursor: pointer;
+    user-select: none;
+  }
+  .checkbox-row input { accent-color: var(--navy); width: 14px; height: 14px; cursor: pointer; }
+
+  .widget-cta {
+    margin-top: auto;
+    background: var(--navy);
+    color: var(--cream);
+    padding: 20px 28px;
+    border: none;
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 160ms ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .widget-cta:hover { background: var(--navy-deep); }
+  .widget-cta:disabled { opacity: 0.4; cursor: not-allowed; }
+  .widget-cta .amount-display {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-variation-settings: 'opsz' 30, 'SOFT' 40;
+    letter-spacing: -0.02em;
+    text-transform: none;
+  }
+
+  /* step 2: payment method */
+  .pay-methods {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .pay-method {
+    border: 1px solid var(--line-strong);
+    background: var(--cream);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 140ms ease;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+  .pay-method:hover { border-color: var(--navy); }
+  .pay-method.active {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: var(--cream);
+  }
+  .pay-method.active .pm-sub { color: var(--gold-soft); }
+  .pay-method .pm-logo {
+    width: 40px; height: 28px;
+    display: grid; place-items: center;
+    background: rgba(0,0,0,0.04);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .pay-method.active .pm-logo { background: rgba(255,255,255,0.15); }
+  .pay-method .pm-name {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 18, 'SOFT' 50;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.1;
+  }
+  .pay-method .pm-sub {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--ink-2);
+    margin-top: 3px;
+  }
+
+  .summary {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-2);
+  }
+  .summary-row + .summary-row { border-top: 1px solid var(--line); }
+  .summary-row .v {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 18, 'SOFT' 40;
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    text-transform: none;
+  }
+  .summary-row.total .v {
+    font-size: 22px;
+    color: var(--navy);
+  }
+
+  .back-link {
+    background: none;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 140ms ease;
+  }
+  .back-link:hover { color: var(--navy); }
+
+  /* step 3: paynow handoff (simulated) */
+  .paynow-handoff {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    gap: 16px;
+  }
+  .paynow-handoff .spinner {
+    width: 56px; height: 56px;
+    border: 2px solid var(--line);
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .paynow-handoff .pn-logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-variation-settings: 'opsz' 60, 'SOFT' 30;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .paynow-handoff .pn-logo span { color: var(--navy); }
+  .paynow-handoff .pn-status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .paynow-handoff .pn-detail {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--ink-2);
+    max-width: 320px;
+    line-height: 1.5;
+  }
+  .paynow-handoff .ref {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-2);
+    padding: 6px 12px;
+    border: 1px dashed var(--line-strong);
+    margin-top: 8px;
+  }
+
+  /* success state */
+  .success-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+  }
+  .success-top { padding: 20px 0; }
+  .success-mark {
+    width: 64px; height: 64px;
+    margin: 0 auto 24px;
+    border: 1px solid var(--navy);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--navy);
+    position: relative;
+  }
+  .success-mark::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+  }
+  .success-mark svg { width: 28px; height: 28px; }
+  .success-title {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 60, 'SOFT' 80;
+    font-style: italic;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .success-body {
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 320px;
+    margin: 0 auto 24px;
+  }
+  .success-receipt {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 16px;
+    margin: 0 auto 20px;
+    max-width: 320px;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  .success-receipt strong { color: var(--ink); font-weight: 500; }
+  .success-actions { display: flex; gap: 8px; }
+  .success-actions .btn { flex: 1; justify-content: center; padding: 14px; }
+
+  /* live ticker — below widget */
+  .ticker-section {
+    margin-top: 56px;
+    padding: 28px 0;
+    border-top: 1px solid rgba(184, 146, 74, 0.18);
+    border-bottom: 1px solid rgba(184, 146, 74, 0.18);
+    overflow: hidden;
+  }
+  .ticker-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ticker-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .ticker-track {
+    display: flex;
+    gap: 48px;
+    white-space: nowrap;
+    animation: marquee 60s linear infinite;
+  }
+  .ticker-item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 12px;
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-variation-settings: 'opsz' 18, 'SOFT' 50;
+    color: rgba(250, 244, 230, 0.85);
+  }
+  .ticker-item .who { font-style: italic; color: var(--gold-soft); }
+  .ticker-item .amt {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--cream);
+    background: rgba(184, 146, 74, 0.12);
+    padding: 2px 8px;
+  }
+  .ticker-item .what { color: rgba(250, 244, 230, 0.55); font-size: 14px; font-variation-settings: 'opsz' 14, 'SOFT' 50; }
+
+  /* ---------- campaigns grid section ---------- */
+  .campaigns-section { padding: 120px 0; }
+  @media (max-width: 980px) { .campaigns-section { padding: 80px 0; } }
+  .section-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: end;
+    margin-bottom: 56px;
+  }
+  @media (max-width: 880px) { .section-head { grid-template-columns: 1fr; gap: 24px; } }
+  .section-head h2 {
+    font-size: clamp(40px, 6vw, 80px);
+    margin-top: 16px;
+  }
+  .section-head p {
+    font-family: var(--font-display);
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    font-variation-settings: 'opsz' 18, 'SOFT' 50;
+    max-width: 460px;
+  }
+
+  .campaigns-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 980px) { .campaigns-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .campaigns-grid { grid-template-columns: 1fr; } }
+  .campaign-card {
+    background: var(--paper);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-height: 320px;
+    cursor: pointer;
+    transition: background 200ms ease;
+    position: relative;
+  }
+  .campaign-card:hover { background: var(--cream); }
+  .campaign-card:hover .cc-name { color: var(--navy); }
+  .cc-head { display: flex; justify-content: space-between; align-items: flex-start; }
+  .cc-cat {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+  .cc-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-2);
+  }
+  .cc-name {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 60, 'SOFT' 40;
+    font-size: 28px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    transition: color 200ms ease;
+  }
+  .cc-blurb {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 14, 'SOFT' 50;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    flex: 1;
+  }
+  .cc-progress {
+    height: 4px;
+    background: var(--paper-deep);
+    position: relative;
+    overflow: hidden;
+  }
+  .cc-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--navy);
+  }
+  .cc-meta {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+  .cc-meta .raised { color: var(--ink); font-weight: 500; }
+
+  /* ---------- how it works ---------- */
+  .how-section {
+    background: var(--cream);
+    padding: 120px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 980px) { .how-section { padding: 80px 0; } }
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    margin-top: 56px;
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 880px) { .how-grid { grid-template-columns: 1fr; } }
+  .how-step {
+    background: var(--cream);
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 360px;
+  }
+  .how-num {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+    font-size: 80px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--navy);
+    font-weight: 400;
+  }
+  .how-step h3 {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 60, 'SOFT' 60;
+    font-size: 26px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+  .how-step p {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 14, 'SOFT' 50;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  .how-rail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+  }
+  .how-rail span {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    border: 1px solid var(--line-strong);
+    padding: 4px 8px;
+  }
+
+  /* ---------- paynow for schools pitch ---------- */
+  .pitch-section {
+    background: var(--navy-deep);
+    color: var(--cream);
+    padding: 140px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 980px) { .pitch-section { padding: 80px 0; } }
+  .pitch-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(184, 146, 74, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(184, 146, 74, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .pitch-eyebrow {
+    color: var(--gold-soft);
+  }
+  .pitch-title {
+    font-size: clamp(48px, 9vw, 144px);
+    color: var(--cream);
+    margin: 16px 0 56px;
+    max-width: 1100px;
+  }
+  .pitch-title em {
+    color: var(--gold-soft);
+  }
+  .pitch-intro {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2.4vw, 28px);
+    line-height: 1.45;
+    color: rgba(250, 244, 230, 0.85);
+    font-variation-settings: 'opsz' 30, 'SOFT' 50;
+    max-width: 760px;
+    margin-bottom: 96px;
+  }
+  .pitch-intro strong { color: var(--gold-soft); font-weight: 500; }
+
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(184, 146, 74, 0.18);
+    border: 1px solid rgba(184, 146, 74, 0.18);
+  }
+  @media (max-width: 980px) { .pillars { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .pillars { grid-template-columns: 1fr; } }
+  .pillar {
+    background: var(--navy-deep);
+    padding: 36px 28px;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .pillar-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold-soft);
+  }
+  .pillar h4 {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 60, 'SOFT' 60;
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    color: var(--cream);
+  }
+  .pillar p {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 14, 'SOFT' 50;
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(250, 244, 230, 0.7);
+    margin-top: auto;
+  }
+
+  /* stats block */
+  .pitch-stats {
+    margin-top: 96px;
+    padding-top: 56px;
+    border-top: 1px solid rgba(184, 146, 74, 0.18);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+  }
+  @media (max-width: 880px) { .pitch-stats { grid-template-columns: repeat(2, 1fr); gap: 32px; } }
+  .stat .n {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 144, 'SOFT' 40;
+    font-size: clamp(48px, 5vw, 72px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--gold-soft);
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  .stat .l {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(250, 244, 230, 0.6);
+  }
+
+  /* ---------- embed block ---------- */
+  .embed-section { padding: 120px 0; }
+  @media (max-width: 980px) { .embed-section { padding: 80px 0; } }
+  .embed-card {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 56px;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 56px;
+    align-items: center;
+    margin-top: 48px;
+  }
+  @media (max-width: 880px) {
+    .embed-card { grid-template-columns: 1fr; padding: 32px; gap: 32px; }
+  }
+  .embed-card h3 {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 60, 'SOFT' 60;
+    font-size: 36px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+  .embed-card p {
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 1.55;
+    color: rgba(250, 244, 230, 0.7);
+    margin-bottom: 24px;
+  }
+  .embed-code {
+    background: rgba(184, 146, 74, 0.08);
+    border: 1px solid rgba(184, 146, 74, 0.2);
+    padding: 24px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--gold-soft);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .embed-code .c { color: rgba(250, 244, 230, 0.4); }
+  .embed-code .k { color: var(--cream); }
+  .embed-code .s { color: var(--gold-soft); }
+  .embed-code .a { color: rgba(212, 179, 116, 0.7); }
+
+  /* ---------- footer ---------- */
+  footer {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 80px 0 40px;
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 56px;
+    margin-bottom: 64px;
+  }
+  @media (max-width: 880px) { .foot-grid { grid-template-columns: 1fr 1fr; gap: 40px; } }
+  .foot-brand h4 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-variation-settings: 'opsz' 30, 'SOFT' 40;
+    margin: 16px 0 12px;
+    font-weight: 400;
+  }
+  .foot-brand p {
+    font-family: var(--font-display);
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(250, 244, 230, 0.6);
+    max-width: 360px;
+  }
+  .foot-col h5 {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+  .foot-col a {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: rgba(250, 244, 230, 0.75);
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: color 140ms ease;
+  }
+  .foot-col a:hover { color: var(--gold-soft); }
+  .foot-bottom {
+    padding-top: 32px;
+    border-top: 1px solid rgba(184, 146, 74, 0.18);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(250, 244, 230, 0.4);
+  }
+
+  /* ---------- crest svg defaults ---------- */
+  svg .crest-line { fill: none; stroke: currentColor; stroke-width: 1.5; }
+  svg .crest-fill { fill: currentColor; }
+
+  /* ---------- ornamental divider ---------- */
+  .ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 48px 0;
+    color: var(--navy);
+  }
+  .ornament .line {
+    flex: 1;
+    max-width: 240px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+  }
+  .ornament .mark {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--gold-deep);
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+  }
+  .ornament-dark { color: var(--gold-soft); }
+  .ornament-dark .line { background: linear-gradient(90deg, transparent, rgba(212,179,116,0.4), transparent); }
+  .ornament-dark .mark { color: var(--gold-soft); }
+
+  /* ---------- drop cap ---------- */
+  .drop-cap::first-letter {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 144, 'SOFT' 40;
+    font-size: 5.4em;
+    line-height: 0.82;
+    float: left;
+    color: var(--navy);
+    padding: 0.04em 0.14em 0 0;
+    margin-top: 0.04em;
+    font-weight: 400;
+  }
+
+  /* ---------- testimony / pull quote ---------- */
+  .testimony-section {
+    padding: 140px 0 120px;
+    background:
+      linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 980px) { .testimony-section { padding: 96px 0 72px; } }
+  .testimony-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 32px;
+    text-align: center;
+    position: relative;
+  }
+  .testimony-mark {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 220px;
+    line-height: 0.6;
+    color: var(--navy);
+    opacity: 0.18;
+    position: absolute;
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 400;
+    pointer-events: none;
+    user-select: none;
+  }
+  .testimony-quote {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(32px, 4.6vw, 68px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    position: relative;
+    z-index: 2;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .testimony-quote em { color: var(--navy-soft); font-style: italic; }
+  .testimony-attr {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 48px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .testimony-attr::before, .testimony-attr::after {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--navy);
+  }
+  .testimony-attr .name { color: var(--navy); font-weight: 500; }
+
+  /* ---------- how grid connector ornament ---------- */
+  .how-grid {
+    position: relative;
+  }
+  .how-step {
+    position: relative;
+  }
+  .how-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -14px;
+    top: 56px;
+    background: var(--cream);
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+    color: var(--gold-deep);
+    font-family: var(--font-display);
+    font-size: 18px;
+    z-index: 2;
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 880px) {
+    .how-step:not(:last-child)::after { display: none; }
+  }
+
+  /* ---------- micro signed labels (widget) ---------- */
+  .signed {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    opacity: 0.6;
+  }
+
+  /* refined inputs */
+  .field {
+    position: relative;
+  }
+  .field-label {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .field-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .field-num {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: var(--navy);
+    opacity: 0.7;
+  }
+
+  /* footer ornament */
+  .foot-ornament {
+    text-align: center;
+    margin: 56px 0 32px;
+    color: var(--gold-soft);
+    opacity: 0.4;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 22px;
+    letter-spacing: 0.6em;
+    padding-left: 0.6em;
+  }
+
+  /* accessibility — focus rings */
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ============ topbar ============ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#" class="brand-mark" aria-label="Falcon College, est. 1954">
+      <svg class="brand-crest" viewBox="0 0 48 56" aria-hidden="true">
+        <!-- shield outline -->
+        <path d="M24 3 L43 7 L43 28 Q43 41 24 52 Q5 41 5 28 L5 7 Z"
+              fill="#FAF4E6" stroke="#0B2447" stroke-width="1.4"/>
+        <!-- inner frame -->
+        <path d="M24 6 L40 9.4 L40 28 Q40 39 24 48.5 Q8 39 8 28 L8 9.4 Z"
+              fill="none" stroke="#0B2447" stroke-width="0.5" opacity="0.4"/>
+        <!-- horizon band -->
+        <path d="M8 27 L40 27" stroke="#B8924A" stroke-width="0.7"/>
+        <!-- stooping falcon: head, body, swept-back wings -->
+        <g fill="#0B2447">
+          <!-- head -->
+          <circle cx="24" cy="15" r="2.2"/>
+          <!-- beak -->
+          <path d="M24 13.5 L25.5 12 L24 14 Z"/>
+          <!-- body / torso descending -->
+          <path d="M24 17 Q22.5 21 22.6 27 Q22.7 31 24 33 Q25.3 31 25.4 27 Q25.5 21 24 17 Z"/>
+          <!-- left wing swept back/up -->
+          <path d="M22.4 18 Q17 17 12.5 12 Q15.5 19 18 22 Q20.5 24 22.4 23 Z"/>
+          <!-- right wing swept back/up -->
+          <path d="M25.6 18 Q31 17 35.5 12 Q32.5 19 30 22 Q27.5 24 25.6 23 Z"/>
+          <!-- tail feathers -->
+          <path d="M23.4 32 L22.5 36 L23.7 35 L24 36 L24.3 35 L25.5 36 L24.6 32 Z"/>
+        </g>
+        <!-- motto banner dots -->
+        <circle cx="14" cy="44" r="0.6" fill="#0B2447"/>
+        <circle cx="24" cy="46" r="0.6" fill="#0B2447"/>
+        <circle cx="34" cy="44" r="0.6" fill="#0B2447"/>
+      </svg>
+      <span class="brand-words">
+        <span class="one">Falcon College</span>
+        <span class="two">Est. MCMLIV · Sic Itur Ad Astra</span>
+      </span>
+    </a>
+    <nav class="nav">
+      <a href="#widget">Donate</a>
+      <a href="#campaigns">Campaigns</a>
+      <a href="#how">How</a>
+      <a href="#paynow-schools">For Schools</a>
+      <a href="#widget" class="cta">Give Now ↗</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ hero ============ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-meta">
+          <span class="label">A Falcon College Initiative</span>
+          <span class="dot"></span>
+          <span class="label">In partnership with Paynow</span>
+          <span class="dot"></span>
+          <span class="label">Old Hawks Fund · 2026</span>
+        </div>
+        <h1 class="display hero-title">
+          Build what<br />
+          <em>endures.</em>
+        </h1>
+        <p class="hero-lede drop-cap">
+          Seventy-two years of Falcon men have walked these grounds.
+          The next seventy depend on what we put back.
+          <strong>Give to a use case, not a generalised pot</strong> —
+          every dollar routed to a named project, every project
+          ledgered in real time, every donor visible to the school
+          they shaped.
+        </p>
+        <div class="hero-cta-row">
+          <a href="#widget" class="btn btn-primary">
+            Make a Gift
+            <span class="arrow">→</span>
+          </a>
+          <a href="#campaigns" class="btn btn-ghost">
+            View All Campaigns
+          </a>
+        </div>
+      </div>
+
+      <aside class="spotlight" aria-labelledby="spot-title">
+        <div class="spotlight-head">
+          <span class="tag">Campaign in Focus</span>
+          <span class="num-no">№ 04 / 06</span>
+        </div>
+        <h3 id="spot-title">The Chapel Window Restoration</h3>
+        <p>
+          The 1962 stained-glass panels behind the altar have weathered
+          six decades of Matabeleland sun. A craftsman in Cape Town has
+          quoted the full restoration. We are eighty percent there.
+        </p>
+        <div class="progress-block">
+          <span class="raised num">$48,200</span>
+          <span class="goal">of $60,000 goal</span>
+        </div>
+        <div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-fill" data-fill="80"></div>
+        </div>
+        <div class="spotlight-stats">
+          <div>
+            <span class="stat-n num">312</span>
+            <span class="stat-l">Donors</span>
+          </div>
+          <div>
+            <span class="stat-n num">42d</span>
+            <span class="stat-l">Remaining</span>
+          </div>
+          <div>
+            <span class="stat-n num">80%</span>
+            <span class="stat-l">Funded</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="hero-marquee">
+    <div class="marquee-inner">
+      <span class="marquee-item">Endow the future</span>
+      <span class="marquee-item">Restore the chapel</span>
+      <span class="marquee-item">Equip the lab</span>
+      <span class="marquee-item">Cox the eight</span>
+      <span class="marquee-item">Bursary the next boy</span>
+      <span class="marquee-item">Honour the master</span>
+      <!-- duplicate for seamless marquee -->
+      <span class="marquee-item">Endow the future</span>
+      <span class="marquee-item">Restore the chapel</span>
+      <span class="marquee-item">Equip the lab</span>
+      <span class="marquee-item">Cox the eight</span>
+      <span class="marquee-item">Bursary the next boy</span>
+      <span class="marquee-item">Honour the master</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ testimony / pull-quote ============ -->
+<section class="testimony-section" aria-label="Headmaster's testimony">
+  <div class="testimony-inner">
+    <span class="testimony-mark" aria-hidden="true">&ldquo;</span>
+    <blockquote class="testimony-quote">
+      A school is not a building. It is a <em>seventy-year conversation</em>
+      between the boys who arrive and the men who have come before them &mdash;
+      and the conversation runs on what we are willing to put back.
+    </blockquote>
+    <div class="testimony-attr">
+      <span><span class="name">R. T. Harman</span> · Headmaster · Speech Day 2025</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ widget section ============ -->
+<section class="widget-section" id="widget">
+  <div class="container">
+    <div class="widget-header">
+      <div>
+        <span class="eyebrow">— The Giving Desk</span>
+        <h2 class="display">Make a <em>gift</em>.</h2>
+      </div>
+      <p>
+        Pick a use case. Choose an amount. Pay the way you
+        already pay everything else in Zimbabwe — Ecocash, OneMoney,
+        Innbucks, Zimswitch, or any Visa / Mastercard from abroad.
+        The school sees your name; the world sees your impact.
+      </p>
+    </div>
+
+    <!-- THE WIDGET -->
+    <div class="widget" id="give-widget">
+
+      <!-- LEFT: campaign list + featured -->
+      <div class="widget-left">
+        <span class="label">Select a Campaign</span>
+        <div class="campaign-list" role="listbox" aria-label="Active campaigns">
+          <button class="campaign-item active" data-campaign="0" role="option" aria-selected="true">
+            <span class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 20 V8 L12 3 L20 8 V20 H14 V14 H10 V20 Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            </span>
+            <span class="ci-body">
+              <span class="ci-name">Chapel Window Restoration</span>
+              <span class="ci-progress"><span class="ci-fill" style="width:80%"></span></span>
+              <span class="ci-meta"><span>$48,200 / $60,000</span><span>80%</span></span>
+            </span>
+          </button>
+
+          <button class="campaign-item" data-campaign="1" role="option" aria-selected="false">
+            <span class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3 18 L12 6 L21 18 Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 18 L9 14 L15 14 L15 18" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            </span>
+            <span class="ci-body">
+              <span class="ci-name">Hawks Bursary Fund (2026 Intake)</span>
+              <span class="ci-progress"><span class="ci-fill" style="width:64%"></span></span>
+              <span class="ci-meta"><span>$96,500 / $150,000</span><span>64%</span></span>
+            </span>
+          </button>
+
+          <button class="campaign-item" data-campaign="2" role="option" aria-selected="false">
+            <span class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 12 H20 M12 4 V20 M6 6 L18 18 M18 6 L6 18" stroke="currentColor" stroke-width="1" fill="none"/></svg>
+            </span>
+            <span class="ci-body">
+              <span class="ci-name">First XV Rugby — Tour to Stellenbosch</span>
+              <span class="ci-progress"><span class="ci-fill" style="width:42%"></span></span>
+              <span class="ci-meta"><span>$8,400 / $20,000</span><span>42%</span></span>
+            </span>
+          </button>
+
+          <button class="campaign-item" data-campaign="3" role="option" aria-selected="false">
+            <span class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 4 H18 V20 H6 Z M9 8 H15 M9 12 H15 M9 16 H13" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            </span>
+            <span class="ci-body">
+              <span class="ci-name">The Library — Heritage Texts Acquisition</span>
+              <span class="ci-progress"><span class="ci-fill" style="width:91%"></span></span>
+              <span class="ci-meta"><span>$13,650 / $15,000</span><span>91%</span></span>
+            </span>
+          </button>
+
+          <button class="campaign-item" data-campaign="4" role="option" aria-selected="false">
+            <span class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 21 V18 Q5 14 12 14 Q19 14 19 18 V21" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            </span>
+            <span class="ci-body">
+              <span class="ci-name">The Beit House Common Room</span>
+              <span class="ci-progress"><span class="ci-fill" style="width:28%"></span></span>
+              <span class="ci-meta"><span>$7,000 / $25,000</span><span>28%</span></span>
+            </span>
+          </button>
+
+          <button class="campaign-item" data-campaign="5" role="option" aria-selected="false">
+            <span class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3 18 L12 18 L21 18 M5 18 L7 8 L17 8 L19 18 M9 8 L11 4 L13 4 L15 8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            </span>
+            <span class="ci-body">
+              <span class="ci-name">Science Block — Lab Equipment</span>
+              <span class="ci-progress"><span class="ci-fill" style="width:55%"></span></span>
+              <span class="ci-meta"><span>$22,000 / $40,000</span><span>55%</span></span>
+            </span>
+          </button>
+        </div>
+
+        <article class="featured-campaign" aria-labelledby="feat-title">
+          <div class="head">
+            <span class="tag" id="feat-cat">Capital · Heritage</span>
+            <span class="num-no" id="feat-no">№ 04 / 06</span>
+          </div>
+          <h4 id="feat-title">Chapel Window Restoration</h4>
+          <p id="feat-blurb">
+            Six decades of southern African light have lifted the cobalt
+            and rose pigments from the 1962 panels behind the altar.
+            Master glazier Pieter du Toit has quoted a full restoration
+            to be completed by Speech Day 2026.
+          </p>
+          <div class="featured-meta">
+            <div>
+              <span class="v num" id="feat-raised">$48,200</span>
+              Raised
+            </div>
+            <div>
+              <span class="v num" id="feat-goal">$60,000</span>
+              Goal
+            </div>
+            <div>
+              <span class="v num" id="feat-donors">312</span>
+              Donors
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- RIGHT: donation form -->
+      <div class="widget-right">
+
+        <div class="step-indicator" aria-live="polite">
+          <span class="step active" data-step-ind="1"><span class="dot"></span>01 · Your Gift</span>
+          <span class="sep">/</span>
+          <span class="step" data-step-ind="2"><span class="dot"></span>02 · Payment</span>
+          <span class="sep">/</span>
+          <span class="step" data-step-ind="3"><span class="dot"></span>03 · Confirm</span>
+        </div>
+
+        <!-- STEP 1: amount + donor -->
+        <div class="step-panel active" data-step="1">
+          <div class="amount-section">
+            <label for="amount-grid" class="field-label"><span class="field-num">i.</span> Amount in USD</label>
+            <div class="amount-grid" id="amount-grid" role="group">
+              <button type="button" class="amount-chip" data-amt="25">$25</button>
+              <button type="button" class="amount-chip" data-amt="50">$50</button>
+              <button type="button" class="amount-chip active" data-amt="100">$100</button>
+              <button type="button" class="amount-chip" data-amt="250">$250</button>
+              <button type="button" class="amount-chip" data-amt="500">$500</button>
+              <button type="button" class="amount-chip" data-amt="1000">$1,000</button>
+            </div>
+            <input type="number" class="custom-amount" id="custom-amount"
+                   placeholder="Or another amount …" min="1" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="donor-name"><span class="field-num">ii.</span> Your Name</label>
+            <input type="text" id="donor-name" placeholder="As it should appear on the donor wall" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="donor-email"><span class="field-num">iii.</span> Email · for your receipt</label>
+            <input type="email" id="donor-email" placeholder="alumnus@example.com" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="donor-msg"><span class="field-num">iv.</span> A Message · optional</label>
+            <textarea id="donor-msg" placeholder="A word of support, a class year, a master remembered."></textarea>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="anon-flag" />
+            Give anonymously — do not list me on the donor wall
+          </label>
+
+          <button class="widget-cta" id="cta-step1">
+            Continue to Payment
+            <span class="amount-display num" id="cta-amount">$100</span>
+          </button>
+        </div>
+
+        <!-- STEP 2: payment method -->
+        <div class="step-panel" data-step="2">
+          <button class="back-link" data-back="1">← Back to Your Gift</button>
+
+          <span class="field-label"><span class="field-num">i.</span> Choose a Payment Rail</span>
+          <div class="pay-methods" role="group" aria-label="Payment methods">
+            <button type="button" class="pay-method active" data-pm="ecocash">
+              <span class="pm-logo" style="background:#E60028;color:#fff;">EC</span>
+              <span>
+                <span class="pm-name">Ecocash</span>
+                <span class="pm-sub">Mobile · ZW</span>
+              </span>
+            </button>
+            <button type="button" class="pay-method" data-pm="onemoney">
+              <span class="pm-logo" style="background:#003B6F;color:#fff;">OM</span>
+              <span>
+                <span class="pm-name">OneMoney</span>
+                <span class="pm-sub">Mobile · ZW</span>
+              </span>
+            </button>
+            <button type="button" class="pay-method" data-pm="innbucks">
+              <span class="pm-logo" style="background:#0B1E3F;color:#FFB300;">IB</span>
+              <span>
+                <span class="pm-name">InnBucks</span>
+                <span class="pm-sub">Wallet · ZW</span>
+              </span>
+            </button>
+            <button type="button" class="pay-method" data-pm="zimswitch">
+              <span class="pm-logo" style="background:#003366;color:#fff;">ZS</span>
+              <span>
+                <span class="pm-name">Zimswitch</span>
+                <span class="pm-sub">Card · ZW Banks</span>
+              </span>
+            </button>
+            <button type="button" class="pay-method" data-pm="visa">
+              <span class="pm-logo" style="background:#1A1F71;color:#fff;">VISA</span>
+              <span>
+                <span class="pm-name">Visa / Mastercard</span>
+                <span class="pm-sub">Diaspora · USD</span>
+              </span>
+            </button>
+            <button type="button" class="pay-method" data-pm="paypal">
+              <span class="pm-logo" style="background:#003087;color:#FFC439;">PP</span>
+              <span>
+                <span class="pm-name">PayPal</span>
+                <span class="pm-sub">Diaspora · USD</span>
+              </span>
+            </button>
+          </div>
+
+          <div class="summary">
+            <div class="summary-row">
+              <span>Campaign</span>
+              <span class="v" id="sum-campaign">Chapel Window Restoration</span>
+            </div>
+            <div class="summary-row">
+              <span>Donor</span>
+              <span class="v" id="sum-donor">An Old Hawk</span>
+            </div>
+            <div class="summary-row">
+              <span>Payment Rail</span>
+              <span class="v" id="sum-rail">Ecocash</span>
+            </div>
+            <div class="summary-row total">
+              <span>Your Gift</span>
+              <span class="v num" id="sum-total">$100.00</span>
+            </div>
+          </div>
+
+          <button class="widget-cta" id="cta-step2">
+            Confirm &amp; Pay via Paynow
+            <span class="arrow">→</span>
+          </button>
+        </div>
+
+        <!-- STEP 3a: Paynow handoff -->
+        <div class="step-panel" data-step="3">
+          <div class="paynow-handoff">
+            <div class="pn-logo">pay<span>now</span></div>
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="pn-status">AUTH &rarr; PAY · routing your gift</div>
+            <p class="pn-detail">
+              Your payment is authorising on Paynow's merchant rails,
+              then BillPay routes it directly to the Falcon College
+              biller account — under the campaign you chose. No
+              intermediary holds your money.
+            </p>
+            <div class="ref num" id="pn-ref">BillPayReference · FAL-...</div>
+          </div>
+        </div>
+
+        <!-- STEP 4: success -->
+        <div class="step-panel" data-step="4">
+          <div class="success-state">
+            <div class="success-top">
+              <div class="success-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 12 L10 17 L19 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3 class="success-title">Sic itur ad astra.</h3>
+              <p class="success-body">
+                Your gift has been received and ledgered against the
+                campaign. A receipt is on its way. The school thanks you.
+              </p>
+              <div class="success-receipt">
+                BillPayReference · <strong id="rec-ref">FAL-260513140000123</strong><br />
+                Biller · <strong>FAL · Falcon College</strong><br />
+                Product · <strong id="rec-camp">Chapel Window Restoration</strong><br />
+                Amount · <strong id="rec-amt">USD 100.00</strong><br />
+                Rail · <strong id="rec-rail">Ecocash</strong><br />
+                Status · <strong>Paid</strong> · <span id="rec-date">13 May 2026</span><br />
+                A VAT-compliant fiscal invoice has been emailed.
+              </div>
+            </div>
+            <div class="success-actions">
+              <button class="btn btn-ghost" id="share-btn">Share to Alumni</button>
+              <button class="btn btn-primary" id="give-again-btn">Give Again</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- live donor ticker -->
+    <div class="ticker-section">
+      <div class="ticker-label">Live · The Donor Wall</div>
+      <div class="ticker-track" id="donor-ticker">
+        <span class="ticker-item"><span class="who">Andrew M. ('94)</span><span class="amt">$250</span><span class="what">to Chapel Window Restoration</span></span>
+        <span class="ticker-item"><span class="who">Anonymous</span><span class="amt">$50</span><span class="what">to Hawks Bursary Fund</span></span>
+        <span class="ticker-item"><span class="who">The Beit Family</span><span class="amt">$1,000</span><span class="what">to Beit House Common Room</span></span>
+        <span class="ticker-item"><span class="who">P. Mhlanga ('07)</span><span class="amt">$100</span><span class="what">to First XV Tour</span></span>
+        <span class="ticker-item"><span class="who">An Old Hawk</span><span class="amt">$500</span><span class="what">to Heritage Texts</span></span>
+        <span class="ticker-item"><span class="who">T. Nyemudzo ('11)</span><span class="amt">$75</span><span class="what">to Science Block</span></span>
+        <span class="ticker-item"><span class="who">Andrew M. ('94)</span><span class="amt">$250</span><span class="what">to Chapel Window Restoration</span></span>
+        <span class="ticker-item"><span class="who">Anonymous</span><span class="amt">$50</span><span class="what">to Hawks Bursary Fund</span></span>
+        <span class="ticker-item"><span class="who">The Beit Family</span><span class="amt">$1,000</span><span class="what">to Beit House Common Room</span></span>
+        <span class="ticker-item"><span class="who">P. Mhlanga ('07)</span><span class="amt">$100</span><span class="what">to First XV Tour</span></span>
+        <span class="ticker-item"><span class="who">An Old Hawk</span><span class="amt">$500</span><span class="what">to Heritage Texts</span></span>
+        <span class="ticker-item"><span class="who">T. Nyemudzo ('11)</span><span class="amt">$75</span><span class="what">to Science Block</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ornament ============ -->
+<div class="ornament" aria-hidden="true">
+  <span class="line"></span>
+  <span class="mark">✦ ❦ ✦</span>
+  <span class="line"></span>
+</div>
+
+<!-- ============ campaigns grid ============ -->
+<section class="campaigns-section" id="campaigns">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">— Six Open Use Cases</span>
+        <h2 class="display">Where your<br/><em>gift goes.</em></h2>
+      </div>
+      <p>
+        Every campaign is run as a named ledger — opened by the bursar,
+        approved by the Board of Governors, closed when the goal is met.
+        Surplus rolls into the General Endowment. Shortfalls are flagged
+        before the term begins.
+      </p>
+    </div>
+
+    <div class="campaigns-grid">
+      <article class="campaign-card">
+        <div class="cc-head"><span class="cc-cat">Heritage</span><span class="cc-no">№ 01</span></div>
+        <h3 class="cc-name">Chapel Window<br/>Restoration</h3>
+        <p class="cc-blurb">Master glazier Pieter du Toit, Cape Town, restoring the 1962 stained-glass panels behind the altar. Completion by Speech Day 2026.</p>
+        <div class="cc-progress"><div class="cc-fill" style="width:80%"></div></div>
+        <div class="cc-meta"><span class="raised num">$48,200 raised</span><span class="num">312 donors</span></div>
+      </article>
+
+      <article class="campaign-card">
+        <div class="cc-head"><span class="cc-cat">Bursary</span><span class="cc-no">№ 02</span></div>
+        <h3 class="cc-name">Hawks Bursary<br/>Fund · 2026</h3>
+        <p class="cc-blurb">Twelve full bursaries for boys from Matabeleland whose families cannot meet fees. Three are already named for masters past.</p>
+        <div class="cc-progress"><div class="cc-fill" style="width:64%"></div></div>
+        <div class="cc-meta"><span class="raised num">$96,500 raised</span><span class="num">208 donors</span></div>
+      </article>
+
+      <article class="campaign-card">
+        <div class="cc-head"><span class="cc-cat">Sport</span><span class="cc-no">№ 03</span></div>
+        <h3 class="cc-name">First XV ·<br/>Stellenbosch Tour</h3>
+        <p class="cc-blurb">Two weeks of fixtures against South African schools through July. Transport, kit, and accommodation for thirty boys plus management.</p>
+        <div class="cc-progress"><div class="cc-fill" style="width:42%"></div></div>
+        <div class="cc-meta"><span class="raised num">$8,400 raised</span><span class="num">61 donors</span></div>
+      </article>
+
+      <article class="campaign-card">
+        <div class="cc-head"><span class="cc-cat">Library</span><span class="cc-no">№ 04</span></div>
+        <h3 class="cc-name">Heritage Texts<br/>Acquisition</h3>
+        <p class="cc-blurb">Twenty-four titles of southern African colonial history, settler diaries, and African nationalist writing — to balance the library's lineage.</p>
+        <div class="cc-progress"><div class="cc-fill" style="width:91%"></div></div>
+        <div class="cc-meta"><span class="raised num">$13,650 raised</span><span class="num">94 donors</span></div>
+      </article>
+
+      <article class="campaign-card">
+        <div class="cc-head"><span class="cc-cat">Boarding</span><span class="cc-no">№ 05</span></div>
+        <h3 class="cc-name">Beit House<br/>Common Room</h3>
+        <p class="cc-blurb">Refit and re-roof of the prep-room block. New leather, new desks, a quiet renewal of the room where most Falcons remember themselves growing up.</p>
+        <div class="cc-progress"><div class="cc-fill" style="width:28%"></div></div>
+        <div class="cc-meta"><span class="raised num">$7,000 raised</span><span class="num">38 donors</span></div>
+      </article>
+
+      <article class="campaign-card">
+        <div class="cc-head"><span class="cc-cat">Academic</span><span class="cc-no">№ 06</span></div>
+        <h3 class="cc-name">Science Block ·<br/>Lab Equipment</h3>
+        <p class="cc-blurb">Microscopes, glassware, a working spectrometer. Resources to teach an A-level practical that holds up to a university entrance exam.</p>
+        <div class="cc-progress"><div class="cc-fill" style="width:55%"></div></div>
+        <div class="cc-meta"><span class="raised num">$22,000 raised</span><span class="num">147 donors</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ how it works ============ -->
+<section class="how-section" id="how">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">— The Mechanics</span>
+        <h2 class="display">How a gift<br/>moves.</h2>
+      </div>
+      <p>
+        From the moment you pick a use case to the moment Falcon's bursar
+        sees the cleared payment is roughly forty-five seconds for in-country
+        mobile money and two business days for diaspora cards. There is
+        no middleman holding your money.
+      </p>
+    </div>
+
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <h3>Choose a use case and an amount.</h3>
+        <p>
+          Browse the six open campaigns. Read each ledger — what it
+          funds, who approved it, what's already raised. Pick one.
+          Set your amount in USD. Optionally leave a note for the
+          donor wall.
+        </p>
+      </div>
+
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <h3>Pay through Paynow's existing rails.</h3>
+        <p>
+          The widget hands off to Paynow — the merchant aggregator
+          already trusted by thousands of Zimbabwean businesses.
+          You complete the gift using whichever rail you already use.
+        </p>
+        <div class="how-rail">
+          <span>Ecocash</span><span>OneMoney</span><span>InnBucks</span>
+          <span>Zimswitch</span><span>Visa</span><span>Mastercard</span><span>PayPal</span>
+        </div>
+      </div>
+
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <h3>The school is paid. You are receipted. The ledger updates.</h3>
+        <p>
+          Funds settle directly to Falcon's institutional account —
+          routed by Paynow against the specific campaign you chose.
+          A receipt is emailed to you. The campaign's progress bar
+          ticks up in real time. Reconciliation is automatic.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ornament ============ -->
+<div class="ornament" aria-hidden="true" style="background:var(--cream);border-top:1px solid var(--line);">
+  <span class="line"></span>
+  <span class="mark">✦ ❦ ✦</span>
+  <span class="line"></span>
+</div>
+
+<!-- ============ paynow for schools pitch ============ -->
+<section class="pitch-section" id="paynow-schools">
+  <div class="container">
+    <span class="eyebrow pitch-eyebrow">— The Bigger Story</span>
+    <h2 class="display pitch-title">
+      Paynow for <em>Schools.</em>
+    </h2>
+    <p class="pitch-intro">
+      What Falcon has here, every Zimbabwean institution should have.
+      A <strong>programmable giving and fees layer</strong> built on the
+      same Paynow merchant infrastructure the country's businesses already
+      run on — embeddable on any school's existing site, no rebuild,
+      no new merchant account, no spreadsheets in the bursar's inbox.
+    </p>
+
+    <div class="pillars">
+      <article class="pillar">
+        <span class="pillar-no">01</span>
+        <h4>One merchant, many use cases.</h4>
+        <p>
+          Schools don't need a separate account per campaign. Paynow
+          holds the merchant relationship; we route programmatically
+          to named ledgers under one settlement.
+        </p>
+      </article>
+      <article class="pillar">
+        <span class="pillar-no">02</span>
+        <h4>Diaspora and local on one widget.</h4>
+        <p>
+          Card rails for offshore alumni, mobile money for in-country —
+          all from a single embed. No DIY Stripe, no Western Union forms.
+        </p>
+      </article>
+      <article class="pillar">
+        <span class="pillar-no">03</span>
+        <h4>A ledger anyone can audit.</h4>
+        <p>
+          Every campaign shows raised, goal, donor count, and message
+          wall in real time. Trust beats fundraising appeals.
+        </p>
+      </article>
+      <article class="pillar">
+        <span class="pillar-no">04</span>
+        <h4>Bursar-friendly by default.</h4>
+        <p>
+          Receipts, donor lists, and CSV exports are automated. The
+          bursar runs school finance, not donation spreadsheets.
+        </p>
+      </article>
+    </div>
+
+    <div class="pitch-stats">
+      <div class="stat">
+        <div class="n num">220+</div>
+        <div class="l">Zim Schools<br/>Addressable</div>
+      </div>
+      <div class="stat">
+        <div class="n num">$84M</div>
+        <div class="l">Annual diaspora<br/>alumni giving · est.</div>
+      </div>
+      <div class="stat">
+        <div class="n num">~45s</div>
+        <div class="l">In-country<br/>gift to settlement</div>
+      </div>
+      <div class="stat">
+        <div class="n num">0</div>
+        <div class="l">New merchant<br/>accounts to open</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ embed ============ -->
+<section class="embed-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">— For Schools &amp; Foundations</span>
+        <h2 class="display">One line.<br/><em>One embed.</em></h2>
+      </div>
+      <p>
+        Schools paste a single script tag onto whatever site they
+        already have. The widget themes to your colours, your crest,
+        your campaigns. We provision the routing on the Paynow side.
+      </p>
+    </div>
+
+    <div class="embed-card">
+      <div>
+        <h3>Drop it on any page.</h3>
+        <p>
+          Add one script tag. Pass your school ID and your active
+          campaign keys. Paynow handles the rest — settlement,
+          receipting, reconciliation. You handle running the school.
+        </p>
+        <a href="#widget" class="btn btn-primary" style="background:var(--gold);color:var(--ink);">
+          See it Live
+          <span class="arrow">→</span>
+        </a>
+      </div>
+      <div class="embed-code"><span class="c">&lt;!-- Paste before &lt;/body&gt;. The widget talks to a Paynow-hosted broker</span>
+<span class="c">     that wraps the BillPay Vendor API (TargetStats, Feed, Auth, Pay). --&gt;</span>
+<span class="k">&lt;script</span>
+  <span class="a">src</span>=<span class="s">"https://schools.paynow.co.zw/widget.js"</span>
+  <span class="a">data-biller</span>=<span class="s">"FAL"</span>
+  <span class="a">data-theme</span>=<span class="s">"falcon-navy"</span>
+  <span class="a">data-products</span>=<span class="s">"CHAPEL,BURSARY,XV,LIBRARY,BEIT,LAB"</span>
+  <span class="a">data-currency</span>=<span class="s">"USD"</span>
+<span class="k">&gt;&lt;/script&gt;</span>
+
+<span class="c">&lt;!-- Where the widget renders --&gt;</span>
+<span class="k">&lt;div</span> <span class="a">id</span>=<span class="s">"paynow-schools-widget"</span><span class="k">&gt;&lt;/div&gt;</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ footer ============ -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <svg width="40" height="40" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 4 L42 8 L42 26 Q42 38 24 44 Q6 38 6 26 L6 8 Z" fill="none" stroke="#E5C885" stroke-width="1.5"/>
+          <path d="M24 14 L28 19 L26 21 L30 24 L26 26 L28 32 L24 30 L20 32 L22 26 L18 24 L22 21 L20 19 Z" fill="#E5C885"/>
+        </svg>
+        <h4>Falcon College · The Old Hawks Fund</h4>
+        <p>
+          A programmable giving initiative powered by Paynow's
+          billpay infrastructure. A pilot of Paynow for Schools.
+        </p>
+      </div>
+      <div class="foot-col">
+        <h5>Give</h5>
+        <a href="#widget">Make a Gift</a>
+        <a href="#campaigns">All Campaigns</a>
+        <a href="#how">How it Works</a>
+        <a href="#">Tax Receipts</a>
+      </div>
+      <div class="foot-col">
+        <h5>The School</h5>
+        <a href="https://www.facebook.com/falconcollege/" target="_blank" rel="noopener">Facebook</a>
+        <a href="#">The Board of Governors</a>
+        <a href="#">Annual Report</a>
+        <a href="#">Contact the Bursar</a>
+      </div>
+      <div class="foot-col">
+        <h5>Paynow for Schools</h5>
+        <a href="#paynow-schools">The Platform</a>
+        <a href="#">Onboard your School</a>
+        <a href="#">For Foundations</a>
+        <a href="#">Press &amp; Partnerships</a>
+      </div>
+    </div>
+    <div class="foot-ornament" aria-hidden="true">✦ ❦ ✦</div>
+    <div class="foot-bottom">
+      <span>© 2026 Falcon College · Paynow Zimbabwe</span>
+      <span>Sic Itur Ad Astra · Thus one journeys to the stars</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ widget logic ============ -->
+<script>
+(function() {
+  'use strict';
+
+  // ---- state ----
+  const state = {
+    campaign: 0,
+    amount: 100,
+    name: '',
+    email: '',
+    msg: '',
+    anonymous: false,
+    rail: 'ecocash',
+    step: 1,
+    ref: null
+  };
+
+  const campaigns = [
+    {
+      name: 'Chapel Window Restoration',
+      cat: 'Capital · Heritage',
+      blurb: 'Six decades of southern African light have lifted the cobalt and rose pigments from the 1962 panels behind the altar. Master glazier Pieter du Toit has quoted a full restoration to be completed by Speech Day 2026.',
+      raised: 48200, goal: 60000, donors: 312, no: '04 / 06'
+    },
+    {
+      name: 'Hawks Bursary Fund — 2026 Intake',
+      cat: 'Bursary · Access',
+      blurb: 'Twelve full bursaries for boys from Matabeleland whose families cannot meet fees. Three are already named for masters past — the rest await an alumni name on the brass plate.',
+      raised: 96500, goal: 150000, donors: 208, no: '02 / 06'
+    },
+    {
+      name: 'First XV Rugby — Tour to Stellenbosch',
+      cat: 'Sport · Tour',
+      blurb: 'Two weeks of fixtures against South African schools through July. Transport, kit, and accommodation for thirty boys plus management.',
+      raised: 8400, goal: 20000, donors: 61, no: '03 / 06'
+    },
+    {
+      name: 'The Library — Heritage Texts Acquisition',
+      cat: 'Library · Academic',
+      blurb: "Twenty-four titles of southern African colonial history, settler diaries, and African nationalist writing — to balance the library's lineage and give context to a Falcon's reading.",
+      raised: 13650, goal: 15000, donors: 94, no: '06 / 06'
+    },
+    {
+      name: 'The Beit House Common Room',
+      cat: 'Boarding · Refit',
+      blurb: 'Refit and re-roof of the prep-room block. New leather, new desks, a quiet renewal of the room where most Falcons remember themselves growing up.',
+      raised: 7000, goal: 25000, donors: 38, no: '05 / 06'
+    },
+    {
+      name: 'Science Block — Lab Equipment',
+      cat: 'Academic · Equipment',
+      blurb: 'Microscopes, glassware, a working spectrometer. Resources to teach an A-level practical that holds up to a university entrance exam.',
+      raised: 22000, goal: 40000, donors: 147, no: '01 / 06'
+    }
+  ];
+
+  const railNames = {
+    ecocash: 'Ecocash',
+    onemoney: 'OneMoney',
+    innbucks: 'InnBucks',
+    zimswitch: 'Zimswitch',
+    visa: 'Visa / Mastercard',
+    paypal: 'PayPal'
+  };
+
+  // ---- helpers ----
+  const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+  const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
+  const fmt = n => '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  const fmt2 = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // ---- campaign selection ----
+  function selectCampaign(idx) {
+    state.campaign = idx;
+    $$('.campaign-item').forEach((el, i) => {
+      el.classList.toggle('active', i === idx);
+      el.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+    });
+    const c = campaigns[idx];
+    $('#feat-title').textContent = c.name;
+    $('#feat-blurb').textContent = c.blurb;
+    $('#feat-cat').textContent = c.cat;
+    $('#feat-no').textContent = '№ ' + c.no;
+    $('#feat-raised').textContent = fmt(c.raised);
+    $('#feat-goal').textContent = fmt(c.goal);
+    $('#feat-donors').textContent = c.donors.toLocaleString();
+    $('#sum-campaign').textContent = c.name;
+  }
+
+  $$('.campaign-item').forEach(el => {
+    el.addEventListener('click', () => selectCampaign(parseInt(el.dataset.campaign, 10)));
+  });
+
+  // ---- amount selection ----
+  function setAmount(n) {
+    state.amount = n;
+    $('#cta-amount').textContent = fmt(n);
+    $('#sum-total').textContent = fmt2(n);
+    $$('.amount-chip').forEach(c => {
+      c.classList.toggle('active', parseInt(c.dataset.amt, 10) === n);
+    });
+  }
+
+  $$('.amount-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      $('#custom-amount').value = '';
+      setAmount(parseInt(c.dataset.amt, 10));
+    });
+  });
+
+  $('#custom-amount').addEventListener('input', (e) => {
+    const n = parseInt(e.target.value, 10);
+    if (!isNaN(n) && n > 0) {
+      $$('.amount-chip').forEach(c => c.classList.remove('active'));
+      state.amount = n;
+      $('#cta-amount').textContent = fmt(n);
+      $('#sum-total').textContent = fmt2(n);
+    }
+  });
+
+  // ---- form inputs ----
+  $('#donor-name').addEventListener('input', e => { state.name = e.target.value; });
+  $('#donor-email').addEventListener('input', e => { state.email = e.target.value; });
+  $('#donor-msg').addEventListener('input', e => { state.msg = e.target.value; });
+  $('#anon-flag').addEventListener('change', e => { state.anonymous = e.target.checked; });
+
+  // ---- payment method selection ----
+  $$('.pay-method').forEach(p => {
+    p.addEventListener('click', () => {
+      state.rail = p.dataset.pm;
+      $$('.pay-method').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      $('#sum-rail').textContent = railNames[state.rail];
+    });
+  });
+
+  // ---- step navigation ----
+  function goToStep(n) {
+    state.step = n;
+    $$('.step-panel').forEach(p => {
+      p.classList.toggle('active', parseInt(p.dataset.step, 10) === n);
+    });
+    $$('.step-indicator .step').forEach(s => {
+      const i = parseInt(s.dataset.stepInd, 10);
+      const stepShown = n > 3 ? 3 : n;
+      s.classList.toggle('active', i === stepShown);
+      s.classList.toggle('done', i < stepShown);
+    });
+    // bring widget into view so each step is fully visible
+    const w = document.getElementById('give-widget');
+    if (w) {
+      const top = w.getBoundingClientRect().top + window.pageYOffset - 96;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }
+
+  $('#cta-step1').addEventListener('click', () => {
+    // populate donor name in summary
+    $('#sum-donor').textContent =
+      state.anonymous ? 'Anonymous' :
+      (state.name.trim() || 'An Old Hawk');
+    $('#sum-rail').textContent = railNames[state.rail];
+    goToStep(2);
+  });
+
+  $$('[data-back]').forEach(btn => {
+    btn.addEventListener('click', () => goToStep(parseInt(btn.dataset.back, 10)));
+  });
+
+  // ---- step 2 -> paynow handoff -> success ----
+  // BillPay convention: BillerCode-yymmddHHmmssfff
+  function makeBillPayRef() {
+    const d = new Date();
+    const pad = (n, w = 2) => String(n).padStart(w, '0');
+    return 'FAL-' +
+      String(d.getFullYear()).slice(2) +
+      pad(d.getMonth() + 1) +
+      pad(d.getDate()) +
+      pad(d.getHours()) +
+      pad(d.getMinutes()) +
+      pad(d.getSeconds()) +
+      pad(d.getMilliseconds(), 3);
+  }
+
+  $('#cta-step2').addEventListener('click', () => {
+    state.ref = makeBillPayRef();
+    $('#pn-ref').textContent = 'REF · ' + state.ref;
+    goToStep(3);
+
+    // simulate paynow redirect / poll
+    setTimeout(() => {
+      // populate receipt
+      $('#rec-ref').textContent = state.ref;
+      $('#rec-camp').textContent = campaigns[state.campaign].name;
+      $('#rec-amt').textContent = 'USD ' + state.amount.toFixed(2);
+      $('#rec-rail').textContent = railNames[state.rail];
+      $('#rec-date').textContent = new Date().toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      });
+      goToStep(4);
+
+      // bump campaign progress optimistically
+      const c = campaigns[state.campaign];
+      c.raised += state.amount;
+      c.donors += 1;
+      const pct = Math.min(100, Math.round((c.raised / c.goal) * 100));
+      // update sidebar fill
+      const sidebarItem = $$('.campaign-item')[state.campaign];
+      $('.ci-fill', sidebarItem).style.width = pct + '%';
+      $$('.ci-meta span', sidebarItem)[0].textContent = fmt(c.raised) + ' / ' + fmt(c.goal);
+      $$('.ci-meta span', sidebarItem)[1].textContent = pct + '%';
+      // update featured panel
+      $('#feat-raised').textContent = fmt(c.raised);
+      $('#feat-donors').textContent = c.donors.toLocaleString();
+    }, 2400);
+  });
+
+  // ---- give again / share ----
+  $('#give-again-btn').addEventListener('click', () => {
+    // reset
+    state.amount = 100;
+    state.name = ''; state.email = ''; state.msg = '';
+    state.anonymous = false;
+    $('#donor-name').value = '';
+    $('#donor-email').value = '';
+    $('#donor-msg').value = '';
+    $('#anon-flag').checked = false;
+    $('#custom-amount').value = '';
+    setAmount(100);
+    goToStep(1);
+  });
+
+  $('#share-btn').addEventListener('click', () => {
+    const c = campaigns[state.campaign];
+    const text = `I just gave to "${c.name}" via the Falcon College Old Hawks Fund. Sic itur ad astra.`;
+    if (navigator.share) {
+      navigator.share({ title: 'Falcon College — Old Hawks Fund', text }).catch(() => {});
+    } else {
+      navigator.clipboard && navigator.clipboard.writeText(text);
+      const btn = $('#share-btn');
+      const old = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      setTimeout(() => btn.textContent = old, 1600);
+    }
+  });
+
+  // ---- animate progress bars on load + on scroll ----
+  function animateProgressBars() {
+    $$('[data-fill]').forEach(el => {
+      const pct = el.dataset.fill;
+      requestAnimationFrame(() => { el.style.width = pct + '%'; });
+    });
+  }
+  setTimeout(animateProgressBars, 200);
+
+  // ---- init ----
+  setAmount(100);
+
+})();
+</script>
+
+</body>
+</html>
