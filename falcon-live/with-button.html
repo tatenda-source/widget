@@ -688,7 +688,7 @@ flex: 1 1 0;
 					</a>
 	</div>
 </div><div id="fl-button-group-button-f9g6daolcpez-2" class="fl-button-group-button fl-button-group-button-f9g6daolcpez-2"><div class="fl-button-wrap fl-button-width-full fl-button-center" id="fl-node-f9g6daolcpez-2">
-			<a href="https://www.paynow.co.zw/" target="_blank" rel="noopener" class="fl-button" style="background:#C9A961 !important; border-color:#C9A961 !important;">
+			<a href="https://www.paynow.co.zw/Payment/Link/?q=c2VhcmNoPXRhdGVuZGF3YWx0ZXI2MiU0MGdtYWlsLmNvbSZhbW91bnQ9MC4wMCZyZWZlcmVuY2U9Jmw9MA%3d%3d" target="_blank" rel="noopener" class="fl-button" style="background:#C9A961 !important; border-color:#C9A961 !important;">
 							<span class="fl-button-text" style="color:#0B2447;">DONATE VIA PAYNOW</span>
 					</a>
 	</div>
@@ -2336,11 +2336,11 @@ const a=JSON.parse(document.getElementById("wp-emoji-settings").textContent),o=(
 <!-- ============================================================ -->
 <!-- PHASE 1 (main): Direct redirect to Paynow's donate flow.      -->
 <!--                                                               -->
-<!-- The button currently points at https://www.paynow.co.zw/ as a -->
-<!-- placeholder. The real URL will be issued by Paynow ops once   -->
-<!-- Falcon Foundation is provisioned as a charity merchant and    -->
-<!-- looks like: https://www.paynow.co.zw/Payment/Link/?q=<GUID>   -->
-<!-- where <GUID> is the unique handle Paynow generates per page.  -->
+<!-- The hero button and the sticky pill both link to a real       -->
+<!-- Paynow Payment Link issued from the merchant dashboard for    -->
+<!-- The Falcon Foundation (integration 24694, in test mode).      -->
+<!-- The link opens Paynow's hosted donate page where the donor    -->
+<!-- enters their amount and pays via Ecocash / OneMoney / card.   -->
 <!--                                                               -->
 <!-- No modal, no iframe, no custom widget. See `phase-2-widget`   -->
 <!-- branch for the campaign-routed vision (modal + custom widget  -->
@@ -2387,7 +2387,7 @@ const a=JSON.parse(document.getElementById("wp-emoji-settings").textContent),o=(
 </style>
 
 <a
-  href="https://www.paynow.co.zw/"
+  href="https://www.paynow.co.zw/Payment/Link/?q=c2VhcmNoPXRhdGVuZGF3YWx0ZXI2MiU0MGdtYWlsLmNvbSZhbW91bnQ9MC4wMCZyZWZlcmVuY2U9Jmw9MA%3d%3d"
   target="_blank"
   rel="noopener"
   class="fg-pill"
